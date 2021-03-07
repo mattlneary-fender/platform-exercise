@@ -230,22 +230,22 @@ Responses
 
 # Thought process
 
-I decided to use Django/Django Rest Framework partially because I'm most familiar with it, but also because it provides an intuitive token authentication interface and automatically hases passwords. A common criticism of Django is that it's not lightweight which is true. For an API this small Django may have been overkill and I could have had fewer lines of code using Flask/SQLAlchemy or FastAPI, but Django was the quickest way for me to complete the task.
+I decided to use Django/Django Rest Framework partially because I'm most familiar with it, but also because it provides an intuitive token authentication interface and automatically hashes passwords. A common criticism of Django is that it's not lightweight which is true. For an API this small Django may have been overkill and I could have had fewer lines of code using Flask/SQLAlchemy or FastAPI, but Django was the quickest way for me to complete the task.
 
-Since the API was going to be hitting a Postgres database, and this was just going to be hosted locally, I thought Docker would be particularly useful. Most of the Dockerfile and docker-compose file is boilerplate code for Django and Postgres so it was really easy to get up and running fast. Hopefully it is for you too!
+Since the API hits a Postgres database and is hosted locally I thought Docker would be particularly useful. Most of the Dockerfile and docker-compose file is boilerplate code for Django and Postgres so it was really easy to get up and running fast. Hopefully it is for you too!
 
-I only created the User model but the auth tokens are stored in another table that DRF automatically generates. There is a serializer for that model which I used to validate the requests. If the data structures were more complex I would have used another serializer to generate the JSON response, but since they were so small I just wrote them in the return statements of the endpoints. 
+I only created the User model but the auth tokens are stored in another table that DRF automatically generates. There is a user serializer which I used to validate the requests. If the data structures were more complex I would have used another serializer to generate the JSON response, but since they were so small I just wrote them in the return statements of the endpoints. 
 
-The endpoints are organized into two sets of classes, the endpoints for authentication and user manipulation. This allowed me to focus on authentication first and then move onto the UsersView without having to worry about authentication. 
+The endpoints are organized into two sets of classes, the endpoints for authentication and user manipulation. This allowed me to focus on authentication first and then move onto the UsersView without having to worry about tokens. 
 
-I didn't have a lot of time to think about security outside of the token authentication, but I did use a uuid primary key on User rather than a sequential ID. This is an easy way to gain a little bit of security since an attack/bot will have a much harder time guessing customer_id's
+I didn't have a lot of time to think about security outside of the token authentication, but I did use a uuid primary key on User rather than a sequential ID. This is an easy way to gain a little bit of security since an attacker/bot will have a much harder time guessing customer_id's.
 
 # Improvements
 
-- Django is very strict about CSRF cookies, which I thought would get in the way of testing this project. I ended up removing the Django middleware responsible for enforcing CSRF checks, which would never be a good idea in a production system.
+- Django is very strict about CSRF cookies, which I thought would get in the way of this project. I ended up removing the Django middleware responsible for enforcing CSRF checks, which would never be a good idea in a production system.
 
 - Originally I had another app called instruments that was going to be a many to one relationship with the User table. I thought it'd be cool to show how the token gave ownership over more objects than just the User, but I ran out of time so I deleted it.
 
-- Login, logout, and register are all separate classes but should be one. Having them separate made it easier to setup the routing, but they're all so logically similar that they should be under one AuthViewSet as separate detailed routes.
+- The login, logout, and register endpoints are all separate classes but should be one. Having them separate made it easier to setup the routing, but they're all so logically similar that they should be under one AuthViewSet as separate detailed routes.
 
 - If this was going to eventually be production code I would only accept requests over HTTPS, especially ones that contained a password.
