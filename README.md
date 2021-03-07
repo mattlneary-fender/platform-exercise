@@ -32,7 +32,7 @@ docker-compose exec api python manage.py test
 You can also verify that the database tables were created correctly
 
 ```
-docker-compose exec postgres psql --username=fender --dbname=fender_users
+docker-compose exec db psql --username=fender --dbname=fender_users
 $> \c fender_users
 $> \dt
 ```
