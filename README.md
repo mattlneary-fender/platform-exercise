@@ -42,7 +42,7 @@ $> \dt
 
 # Interacting with the API
 
-Now that the containers are up and running you can hit the API at http://localhost:8000`/127.0.0.1:8000` 
+Now that the containers are up and running you can hit the API at `http://localhost:8000`/`127.0.0.1:8000` 
 
 You'll first need to create yourself a User object using the /register endpoint. *Note:* All endpoints are expecting a JSON body.
 
@@ -59,7 +59,8 @@ POST - http://localhost:8000/register/
 
 ```
 CURL
-```curl --location --request POST 'http://localhost:8000/register/' \
+```
+curl --location --request POST 'http://localhost:8000/register/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "name": "Matt"
@@ -94,7 +95,8 @@ POST - http://localhost:8000/login/
 
 ```
 CURL
-```curl --location --request POST 'http://localhost:8000/login/' \
+```
+curl --location --request POST 'http://localhost:8000/login/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "name": "Matt"
@@ -179,7 +181,8 @@ PUT - http://localhost:8000/users/
 ```
 
 CURL
-```curl --location --request POST 'http://localhost:8000/users/' \
+```
+curl --location --request POST 'http://localhost:8000/users/' \
 --header 'Content-Type: application/json' \
 --data-raw '{
     "name": "Matt"
