@@ -1,3 +1,48 @@
+# Setup
+
+## Install Docker
+
+First download Docker if you don't already have it installed from https://docs.docker.com/get-docker/
+
+Start up docker and navigate to the `/app/` directory.
+
+## Create a virtualenv
+
+Create a virtualenv using python 3 by running
+```python -m venv virtualenv```
+
+Then start it with
+```source /virtualenv/bin/activate```
+
+## Create the Docker containers
+
+Now that you're in the virtualenv and still in the `/app/` directory you have to create the containers and migrate the database.
+
+```
+docker-compose up -d --build
+docker-compose exec api python manage.py migrate
+```
+
+You can verify that the api container is running correctly by running unit tests
+
+```
+docker-compose exec api python manage.py test
+```
+
+You can also verify that the database tables were created correctly
+
+```
+docker-compose exec postgres psql --username=fender --dbname=fender_users
+$> \c fender_users
+$> \dt
+```
+
+`\dt` will list all relations in the database, so hopefully you see a few different Django models and the `User` table.
+
+
+
+
+
 # Fender Digital Platform Engineering Challenge
 
 ## Description
