@@ -148,3 +148,15 @@ class UserTestCase(APITestCase):
         response = self.client.put(url, data=put_body)
 
         self.assertEqual(response.status_code, 401)
+
+    def test_new_user_cant_register_without_password(self):
+        post_body = {
+            'name': 'some dude',
+            'email': 'somedude@somesite.com'
+        }
+        url = reverse('register')
+        response = self.client.post(url, data=post_body)
+
+        self.assertEqual(User.objects.count(), 0)
+        self.assertEqual(response.status_code, 400)
+

@@ -15,20 +15,16 @@ class BearerTokenAuthentication(TokenAuthentication):
     keyword = 'Bearer'
 
 
-def _validate_serializer_or_400(request, serializer_class):
-    serializer = serializer_class(data=request.data, context={'request': request})
-    try:
-        serializer.is_valid(raise_exception=True)
-    except Exception:
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
 class UserRegistrationView(APIView):
     serializer_class = LoginUserSerializer
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        _validate_serializer_or_400(request, self.serializer_class)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         email = request.data.get('email')
         if User.objects.filter(email=email).count():
@@ -57,7 +53,11 @@ class LoginView(APIView):
     permission_classes = (AllowAny,)
 
     def post(self, request):
-        _validate_serializer_or_400(request, self.serializer_class)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         email = request.data.get('email')
         password = request.data.get('password')
@@ -102,7 +102,11 @@ class UserView(APIView):
         }, status=status.HTTP_200_OK)
 
     def put(self, request):
-        _validate_serializer_or_400(request, self.serializer_class)
+        serializer = self.serializer_class(data=request.data, context={'request': request})
+        try:
+            serializer.is_valid(raise_exception=True)
+        except Exception:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         user = request.user
 
