@@ -188,7 +188,7 @@ CURL
 }' 
 ```
 
-Reponses
+Responses
 
 ```
 200 OK 
@@ -201,6 +201,7 @@ Reponses
 ```
 
 400 Bad Request - If the user tries to change their email address to another one that's already in the database, or fields are missing
+
 401 Unauthorized - Default response for a request that doesn't include a token
 
 ### DELETE
@@ -224,50 +225,24 @@ Responses
 401 Unauthorized - Default response for a request that doesn't include a token
 
 
-# Fender Digital Platform Engineering Challenge
+# Thought process
 
-## Description
+I decided to use Django/Django Rest Framework partially because I'm most familiar with it, but also because it provides an intuitive token authentication interface and automatically hases passwords. A common criticism of Django is that it's not lightweight which is true. For an API this small Django may have been overkill and I could have had fewer lines of code using Flask/SQLAlchemy or FastAPI, but Django was the quickest way for me to complete the task.
 
-Design and implement a RESTful web service to facilitate a user authentication system. The authentication mechanism should be *token based*. Requests and responses should be in **JSON**.
+Since the API was going to be hitting a Postgres database, and this was just going to be hosted locally, I thought Docker would be particularly useful. Most of the Dockerfile and docker-compose file is boilerplate code for Django and Postgres so it was really easy to get up and running fast. Hopefully it is for you too!
 
-## Requirements
+I only created the User model but the auth tokens are stored in another table that DRF automatically generates. There is a serializer for that model which I used to validate the requests. If the data structures were more complex I would have used another serializer to generate the JSON response, but since they were so small I just wrote them in the return statements of the endpoints. 
 
-**Models**
+The endpoints are organized into two sets of classes, the endpoints for authentication and user manipulation. This allowed me to focus on authentication first and then move onto the UsersView without having to worry about authentication. 
 
-The **User** model should have the following properties (at minimum):
+I didn't have a lot of time to think about security outside of the token authentication, but I did use a uuid primary key on User rather than a sequential ID. This is an easy way to gain a little bit of security since an attack/bot will have a much harder time guessing customer_id's
 
-1. name
-2. email
-3. password
+# Improvements
 
-You should determine what, *if any*, additional models you will need.
+- Django is very strict about CSRF cookies, which I thought would get in the way of testing this project. I ended up removing the Django middleware responsible for enforcing CSRF checks, which would never be a good idea in a production system.
 
-**Endpoints**
+- Originally I had another app called instruments that was going to be a many to one relationship with the User table. I thought it'd be cool to show how the token gave ownership over more objects than just the User, but I ran out of time so I deleted it.
 
-All of these endpoints should be written from a user's perspective.
+- Login, logout, and register are all separate classes but should be one. Having them separate made it easier to setup the routing, but they're all so logically similar that they should be under one AuthViewSet as separate detailed routes.
 
-1. **User** Registration
-2. Login (*token based*) - should return a token, given *valid* credentials
-3. Logout - logs a user out
-4. Update a **User**'s Information
-5. Delete a **User**
-
-**README**
-
-Please include:
-- a readme file that explains your thinking
-- how to setup and run the project
-- if you chose to use a database, include instructions on how to set that up
-- if you have tests, include instructions on how to run them
-- a description of what enhancements you might make if you had more time.
-
-**Additional Info**
-
-- We expect this project to take a few hours to complete
-- You can use Rails/Sinatra, Python, Go, node.js or shiny-new-framework X, as long as you tell us why you chose it and how it was a good fit for the challenge. 
-- Feel free to use whichever database you'd like; we suggest Postgres. 
-- Bonus points for security, specs, etc. 
-- Do as little or as much as you like.
-
-Please fork this repo and commit your code into that fork.  Show your work and process through those commits.
-
+- If this was going to eventually be production code I would only accept requests over HTTPS, especially ones that contained a password.
