@@ -15,13 +15,20 @@ class BearerTokenAuthentication(TokenAuthentication):
     keyword = 'Bearer'
 
 
+def _validate_serializer_or_400(request, serializer_class):
+    serializer = serializer_class(data=request.data, context={'request': request})
+    try:
+        serializer.is_valid(raise_exception=True)
+    except Exception:
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class UserRegistrationView(APIView):
     serializer_class = LoginUserSerializer
     permission_classes = (AllowAny,)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
+    def post(self, request):
+        _validate_serializer_or_400(request, self.serializer_class)
 
         email = request.data.get('email')
         if User.objects.filter(email=email).count():
@@ -49,9 +56,8 @@ class LoginView(APIView):
     serializer_class = LoginUserSerializer
     permission_classes = (AllowAny,)
 
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
+    def post(self, request):
+        _validate_serializer_or_400(request, self.serializer_class)
 
         email = request.data.get('email')
         password = request.data.get('password')
@@ -77,9 +83,9 @@ class LogOutView(APIView):
     authentication_classes = (BearerTokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         request.user.auth_token.delete()
-        return Response()
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class UserView(APIView):
@@ -87,7 +93,7 @@ class UserView(APIView):
     authentication_classes = (BearerTokenAuthentication,)
     permission_classes = (IsAuthenticated,)
 
-    def get(self, request, *args, **kwargs):
+    def get(self, request):
         user = request.user
         return Response({
             'user_id': user.id,
@@ -95,20 +101,19 @@ class UserView(APIView):
             'name': user.name
         }, status=status.HTTP_200_OK)
 
-    def put(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data, context={'request': request})
-        serializer.is_valid(raise_exception=True)
+    def put(self, request):
+        _validate_serializer_or_400(request, self.serializer_class)
 
         user = request.user
 
-        new_email = serializer.data['email']
-        if user.email != serializer.data['email'] and User.objects.filter(email=new_email).count():
+        new_email = request.data['email']
+        if user.email != request.data['email'] and User.objects.filter(email=new_email).count():
             return Response('Email already in use.', status=status.HTTP_400_BAD_REQUEST)
         user.email = new_email
-        user.name = serializer.data['name']
+        user.name = request.data['name']
 
         password_changed = False
-        request_password = serializer.data['password']
+        request_password = request.data['password']
         if not user.check_password(request_password):
             user.set_password(request_password)
             password_changed = True
@@ -120,3 +125,8 @@ class UserView(APIView):
             'name': user.name,
             'password_changed': password_changed
         }, status=status.HTTP_200_OK)
+
+    def delete(self, request):
+        user = request.user
+        user.delete()
+        return Response(status=status.HTTP_204_NO_CONTENT)

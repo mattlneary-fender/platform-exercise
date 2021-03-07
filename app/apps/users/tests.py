@@ -66,7 +66,7 @@ class UserTestCase(APITestCase):
         url = reverse('logout')
         response = self.client.get(url)
 
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 204)
         user.refresh_from_db()
         self.assertFalse(hasattr(user, 'auth_token'))
 
@@ -92,6 +92,19 @@ class UserTestCase(APITestCase):
         self.assertEqual(user.email, 'someotherdude@somesite.com')
         self.assertTrue(user.check_password('password1234'))
         self.assertTrue(response.data.get('password_changed'))
+
+    def test_delete_user(self):
+        user = User(name='some dude', email='somedude@somesite.com')
+        user.set_password('password123')
+        user.save()
+
+        token = Token.objects.create(user=user)
+        url = reverse('users-api')
+        self.client.credentials(HTTP_AUTHORIZATION='Bearer ' + token.key)
+        response = self.client.delete(url)
+
+        self.assertEqual(response.status_code, 204)
+        self.assertFalse(User.objects.filter(email='somedude@somesite.com'))
 
     def test_user_cant_register_more_than_once(self):
         post_body = {
