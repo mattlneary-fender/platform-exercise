@@ -40,7 +40,188 @@ $> \dt
 `\dt` will list all relations in the database, so hopefully you see a few different Django models and the `User` table.
 
 
+# Interacting with the API
 
+Now that the containers are up and running you can hit the API at http://localhost:8000`/127.0.0.1:8000` 
+
+You'll first need to create yourself a User object using the /register endpoint. *Note:* All endpoints are expecting a JSON body.
+
+## /register
+
+Postman
+```
+POST - http://localhost:8000/register/
+{
+  "name": "Matt",
+  "email": "myemail@gmail.com",
+  "password": "example_password"
+}
+
+```
+CURL
+```curl --location --request POST 'http://localhost:8000/register/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "Matt"
+    "email": "myemail@gmail.com",
+    "password": "example_password",
+}' 
+```
+Responses
+```
+201 Created 
+{
+  "token": <auth_token_hash>,
+  "user_id": <django_user_uuid>,
+  "email": "myemail@gmail.com"
+}
+```
+
+400 Bad Request - If you try to register an email that's already in use, or fields are missing
+
+## /login
+
+If you already created a User but no longer have an auth token use this endpoint to get another one
+
+Postman
+```
+POST - http://localhost:8000/login/
+{
+  "name": "Matt",
+  "email": "myemail@gmail.com",
+  "password": "example_password"
+}
+
+```
+CURL
+```curl --location --request POST 'http://localhost:8000/login/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "Matt"
+    "email": "myemail@gmail.com",
+    "password": "example_password",
+}' 
+```
+Responses
+```
+200 OK 
+{
+  "token": <auth_token_hash>,
+  "user_id": <django_user_uuid>,
+  "email": "myemail@gmail.com"
+}
+```
+
+400 Bad Request - If any fields are missing
+
+403 Forbidden - If the email and password don't match, or doesn't exist
+
+## /logout
+
+Postman
+
+```
+GET 'http://localhost:8000/logout/'
+Header - 'Authorization: Bearer <token_hash>'
+```
+
+CURL
+```
+curl --location --request GET 'http://localhost:8000/logout/' \
+--header 'Authorization: Bearer <token_hash>'
+```
+
+Reponses
+
+204 No Content
+
+401 Unauthorized - Default response for a request that doesn't include a token
+
+## /users/
+
+### GET
+
+Postman
+
+```
+GET 'http://localhost:8000/users/'
+Header - 'Authorization: Bearer <token_hash>'
+```
+
+CURL
+```
+curl --location --request GET 'http://localhost:8000/users/' \
+--header 'Authorization: Bearer <token_hash>'
+```
+
+Responses
+```
+200 OK 
+{
+  "user_id": <django_user_uuid>,
+  "email": "myemail@gmail.com,
+  "name": "Matt"
+}
+```
+
+401 Unauthorized - Default response for a request that doesn't include a token
+
+### PUT
+
+Postman 
+```
+PUT - http://localhost:8000/users/
+{
+  "name": "Matt",
+  "email": "myemail@gmail.com",
+  "password": "example_password"
+}
+```
+
+CURL
+```curl --location --request POST 'http://localhost:8000/users/' \
+--header 'Content-Type: application/json' \
+--data-raw '{
+    "name": "Matt"
+    "email": "myemail@gmail.com",
+    "password": "example_password",
+}' 
+```
+
+Reponses
+
+```
+200 OK 
+{
+  "user_id": <django_user_uuid>,
+  "email": "myemail@gmail.com,
+  "name": "Matt",
+  "password_changed": <boolean>
+}
+```
+
+400 Bad Request - If the user tries to change their email address to another one that's already in the database, or fields are missing
+401 Unauthorized - Default response for a request that doesn't include a token
+
+### DELETE
+
+Postman
+```
+DELETE 'http://localhost:8000/users/'
+Header - 'Authorization: Bearer <token_hash>'
+```
+
+CURL
+```
+curl --location --request DELETE 'http://localhost:8000/logout/' \
+--header 'Authorization: Bearer <token_hash>'
+```
+
+Responses
+
+204 No Content
+
+401 Unauthorized - Default response for a request that doesn't include a token
 
 
 # Fender Digital Platform Engineering Challenge
