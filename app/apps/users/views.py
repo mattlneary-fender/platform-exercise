@@ -61,7 +61,7 @@ class LoginView(APIView):
 
         user = User.objects.get(email=email)
 
-        if user.auth_token:
+        if hasattr(user, 'auth_token'):
             user.auth_token.delete()
 
         new_token = Token.objects.create(user=user)
